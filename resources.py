@@ -19,7 +19,10 @@ class Ticket(Resource):
 
     def delete(self, id):
         """Delete ticket"""
-        pass
+        try:
+            pass
+        except DoesNotExist:
+            raise NotFound(f'Ticket with id:{id} was not found.')
 
     def patch(self, id):
         """Update ticket"""
