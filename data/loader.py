@@ -29,7 +29,7 @@ class Ticket(Document):
         'collection': 'tickets'
     }
 
-connect(host="mongodb://admin:admin123@127.0.0.1:27017/test?authSource=admin")
+connect(host="mongodb://admin:yourpassword@127.0.0.1:27017/test?authSource=admin")
 
 tickets = {}
 
@@ -43,14 +43,14 @@ def generate_subject(raw_subject):
         return None, raw_subject.strip()
 
 
-with open('/home/dmmg/Desktop/Jobs/Jacaranda_Health/edna/data/Subjects.csv') as subjects:
+with open('./data/Subjects.csv') as subjects:
     reader = csv.DictReader(subjects)
     for row in reader:
         id = row['ticket_id']
         phone, subject = generate_subject(row['subject'])
         tickets[row["ticket_id"]] = Ticket(ticket_id=id, phone=phone, subject=subject)
 
-with open('/home/dmmg/Desktop/Jobs/Jacaranda_Health/edna/data/Messages.csv') as messages:
+with open('./data/Messages.csv') as messages:
     reader = csv.DictReader(messages)
     for row in reader:
         if row['body_text'].startswith('Detected intent:'):

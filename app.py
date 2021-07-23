@@ -3,7 +3,7 @@ from flask_restful import Api
 from mongoengine import connect
 
 from resources import Tickets, Ticket, IncomingMessage, IncomingMessages, OutgoingMessage, OutgoingMessages
-connect(host="mongodb://admin:admin123@127.0.0.1:27017/test?authSource=admin")
+connect(host="mongodb://admin:yourpassword@127.0.0.1:27017/test?authSource=admin")
 
 app = Flask(__name__)
 api = Api(app)
