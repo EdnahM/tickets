@@ -1,3 +1,4 @@
+
 from flask_restful import Resource
 from mongoengine import DoesNotExist
 from werkzeug.exceptions import NotFound
@@ -6,7 +7,6 @@ from models import Ticket as TicketModel
 from schemas import Ticket as TicketSchema, Message as MessageSchema
 
 
-# Implementing the API's End points.
 class Ticket(Resource):
     schema = TicketSchema()
 
@@ -19,7 +19,13 @@ class Ticket(Resource):
 
     def delete(self, id):
         """Delete ticket"""
-        pass
+        try:
+            TicketModel.objects.get(ticket_id=id).delete()
+            return {
+                'message': 'Ticket successfully deleted.'
+            }
+        except DoesNotExist:
+            raise NotFound(f'Ticket with id:{id} was not found.')
 
     def patch(self, id):
         """Update ticket"""
@@ -34,14 +40,15 @@ class Tickets(Resource):
         # TODO: Implement offset and limit for batch tickets GET
         return self.schema.dump(TicketModel.objects, many=True)
 
-    def post(self): 
-
+    def post(self):
         """Add a new ticket"""
         pass
 
     def delete(self):
         """Delete all tickets"""
-        pass
+        ticket = self.schema.get(TicketModel.objects, many=True).delete()      
+        #ticket = TicketModel.objects.get(self).delete()
+        ticket.save()
 
 
 class IncomingMessage(Resource):
@@ -59,7 +66,17 @@ class IncomingMessage(Resource):
 
     def delete(self, ticket_id, message_id):
         """Delete incoming message"""
-        pass
+        try:
+            ticket = TicketModel.objects.get(ticket_id=ticket_id)
+            message = next(message for message in ticket.incoming_messages if message.id == message_id)
+            ticket.incoming_messages.remove(message)
+            ticket.save()
+
+            return 'incoming message deleted'
+        except DoesNotExist:
+            raise NotFound(f'Ticket with id:{ticket_id} was not found.')
+        except StopIteration:
+            raise NotFound(f'Incoming message with id: {message_id} was not found')
 
     def put(self, ticket_id, message_id):
         """Replace incoming message"""
@@ -82,7 +99,15 @@ class IncomingMessages(Resource):
 
     def delete(self, ticket_id):
         """Delete all incoming messages"""
-        pass
+        # ticket = (TicketModel.objects.get(ticket_id=ticket_id).incoming_messeges)
+        try:
+            ticket = TicketModel.objects.get(ticket_id=ticket_id)
+            del ticket.incoming_messages
+            ticket.save()
+            
+            return "All incoming messaged deleted"
+        except DoesNotExist:
+            raise NotFound(f'Ticket with id:{ticket_id} was not found.')
 
     def post(self, ticket_id):
         """Add an incoming message"""
@@ -131,4 +156,3 @@ class OutgoingMessages(Resource):
 
     def delete(self, ticket_id):
         """Delete all outgoing messages"""
-        pass
